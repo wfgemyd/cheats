@@ -1,0 +1,75 @@
+{$LUA}
+if not monopipe then LaunchMonoDataCollector() end
+{$ASM}
+define(address,Player:InGodMode+b)
+  define(bytes,0F B6 80 69 05 00 00 48 83 C4 08 C3 00 01)
+
+[ENABLE]
+
+
+assert(address,bytes)
+alloc(newmem,$100,Player:InGodMode+b)
+alloc(RESTORE_InGodMode,8)
+
+label(code)
+label(return)
+
+newmem:
+  mov [RESTORE_InGodMode],rax
+  mov [rax+569],#1
+
+code:
+  movzx eax,byte ptr [rax+00000569]
+  jmp return
+
+address:
+  jmp newmem
+  nop 2
+return:
+registersymbol(RESTORE_InGodMode)
+
+{$LUA}
+memrec.Color = 0x0000FF00 --format AABBGGRR this is bright green
+{$ASM}
+[DISABLE]
+{$LUA}
+memrec.Color = 0x000000FF -- this is bright red
+
+  writeInteger('[RESTORE_InGodMode]+569',0)
+{$asm}
+unregistersymbol(RESTORE_InGodMode)
+dealloc(RESTORE_InGodMode,8)
+
+address:
+  db bytes
+  // movzx eax,byte ptr [rax+00000569]
+
+dealloc(newmem)
+
+{
+// ORIGINAL CODE - INJECTION POINT: Player:InGodMode+b
+
+21A4DA517EF: 00 01                 - add [rcx],al
+21A4DA517F1: 04 02                 - add al,02
+21A4DA517F3: 05 04 03 01 50        - add eax,50010304
+21A4DA517F8: 00 00                 - add [rax],al
+21A4DA517FA: 00 00                 - add [rax],al
+21A4DA517FC: 00 00                 - add [rax],al
+21A4DA517FE: 00 00                 - add [rax],al
+Player:InGodMode: 48 83 EC 08           - sub rsp,08
+Player:InGodMode+4: 48 89 0C 24           - mov [rsp],rcx
+Player:InGodMode+8: 48 8B C1              - mov rax,rcx
+// ---------- INJECTING HERE ----------
+Player:InGodMode+b: 0F B6 80 69 05 00 00  - movzx eax,byte ptr [rax+00000569]
+// ---------- DONE INJECTING  ----------
+Player:InGodMode+12: 48 83 C4 08           - add rsp,08
+Player:InGodMode+16: C3                    - ret
+21A4DA51817: 00 01                 - add [rcx],al
+21A4DA51819: 04 01                 - add al,01
+21A4DA5181B: 00 04 02              - add [rdx+rax],al
+21A4DA5181E: 00 00                 - add [rax],al
+21A4DA51820: 00 00                 - add [rax],al
+21A4DA51822: 00 00                 - add [rax],al
+21A4DA51824: 00 00                 - add [rax],al
+21A4DA51826: 00 00                 - add [rax],al
+}
