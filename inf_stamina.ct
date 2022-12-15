@@ -1,0 +1,20 @@
+{$LUA}
+if not monopipe then LaunchMonoDataCollector() end
+{$ASM}
+[enable]
+Player:HaveStamina:
+mov al,1
+ret
+nop
+
+{$LUA}
+memrec.Color = 0x0000FF00 --format AABBGGRR this is bright green
+{$ASM}
+[DISABLE]
+{$LUA}
+memrec.Color = 0x000000FF -- this is bright red
+{$ASM}
+
+Player:HaveStamina:
+push rbp
+mov rbp,rsp
